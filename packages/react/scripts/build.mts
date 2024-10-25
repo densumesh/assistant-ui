@@ -29,38 +29,22 @@ for (const file of files) {
   const root = postcss.parse(cssContent);
   const formattedComponents = replaceNullWithObject(postcssJs.objectify(root));
 
-  const outputFile =
-    "./generated/" + file.split("/").pop() + ".json";
+  const outputFile = "./generated/" + file.split("/").pop() + ".json";
   const outputContent = JSON.stringify(formattedComponents, null, 2);
   fs.writeFileSync(outputFile, outputContent);
 }
 
 // JS
 await build({
-  entry: ["src/index.ts", "src/edge.ts", "src/tailwindcss/index.ts"],
+  entry: ["./src/**/*.{ts,tsx,js,jsx}", "!./src/**/*.test.{ts,tsx}"],
   format: ["cjs", "esm"],
+  bundle: false,
+  minify: false,
   dts: true,
   sourcemap: true,
   clean: true,
   splitting: true,
-  esbuildOptions: (options, { format }) => {
-    if (format === "esm") {
-      options.banner = {
-        js: '"use client";',
-      };
-    }
-  },
 });
-
-// TODO find a way to bundle edge with the rest of the package
-await build({
-  entry: ["src/edge.ts"],
-  format: ["cjs", "esm"],
-  dts: true,
-  sourcemap: true,
-});
-
-// css
 
 await build({
   entry: ["src/styles/index.css", "src/styles/modal.css"],
